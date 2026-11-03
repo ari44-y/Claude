@@ -1,0 +1,17 @@
+# 秘密の値（VAPID 鍵など）
+.env
+.env.*
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / ビルド結果
+node_modules/
+frontend/dist/
+
+# データ（DB・レシート画像）はリポジトリに入れない
+*.db
+*.sqlite3
+data/
