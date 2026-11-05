@@ -1,0 +1,11 @@
+# docker build のときに、イメージ作りに渡さないもの。
+# Mac 用の node_modules や .venv が紛れ込むと、Linux のイメージの中で動かないため必ず除く
+**/node_modules
+**/.venv
+**/__pycache__
+frontend/dist
+backend/data
+.git
+**/.env
+**/.env.*
+docs

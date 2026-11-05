@@ -1,0 +1,34 @@
+name: kuroko
+
+# 本番（Ubuntu Server）用。deploy/update.sh から使う。
+#   docker compose -f compose.prod.yaml up -d --build
+#
+# 外からの入口は Tailscale（サーバー本体に入れる）。
+#   tailscale serve --bg 8000  →  https://<サーバー名>.<tailnet>.ts.net を 127.0.0.1:8000 に中継
+
+services:
+  app:
+    build: .
+    image: kuroko-app
+    # Docker が動いていれば、サーバーの再起動後も自動で起動する（systemd のサービスの代わり）。
+    # 自分で docker compose stop したときだけは止まったままにする
+    restart: unless-stopped
+    ports:
+      # 127.0.0.1 を付けて、サーバー本体からしか接続できないようにする。
+      # 付けないと家の LAN の他の機器からも直接開けてしまう
+      # （Docker が公開したポートは、Ubuntu のファイアウォール ufw の設定を素通りする）
+      - "127.0.0.1:8000:8000"
+    volumes:
+      # DB（とレシート画像）はコンテナの外、サーバー本体の /var/lib/kuroko に置く。
+      # コンテナを作り直しても消えず、本体のバックアップ処理からも読める（要件定義書 7.4）
+      - ${KUROKO_DATA_DIR:-/var/lib/kuroko}:/data
+    env_file:
+      # VAPID 鍵などの秘密の値（Git には入れない）。なくても起動できる
+      - path: .env
+        required: false
+    healthcheck:
+      # 30秒ごとに /api/health を呼び、応答がなければ docker ps で unhealthy と表示される
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

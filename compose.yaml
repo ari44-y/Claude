@@ -1,0 +1,54 @@
+name: kuroko-dev
+
+# 開発（Mac）用。リポジトリのフォルダで：
+#   docker compose up          起動（画面 http://localhost:5173、API http://localhost:8000/docs）
+#   docker compose down        停止
+#
+# ソースコードは Mac のフォルダをそのままコンテナに見せる（バインドマウント）ので、
+# Mac のエディタで保存すると、コンテナの中のサーバーが自動で読み直す。
+#
+# node_modules と .venv だけは Mac と共有しない（名前付きボリュームに置く）。
+# 中に Mac 用・Linux 用で別々の実行ファイルが入っており、共有するとどちらかで動かなくなるため。
+
+services:
+  backend:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    working_dir: /app/backend
+    # 起動のたびに：ライブラリをそろえる → DB を最新の形に → API を起動（--reload で保存したら再起動）
+    command: >
+      sh -c "uv sync &&
+             uv run alembic upgrade head &&
+             uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    environment:
+      UV_PROJECT_ENVIRONMENT: /venv # .venv を backend/ の中ではなく、下のボリュームに作る
+      UV_LINK_MODE: copy
+      DATABASE_URL: sqlite:////data/kuroko.db
+    volumes:
+      - ./backend:/app/backend
+      - backend-venv:/venv
+      - backend-data:/data # 開発用の DB。docker compose down -v で消える
+      - uv-cache:/root/.cache/uv
+    ports:
+      - "8000:8000"
+
+  frontend:
+    image: node:26-slim
+    working_dir: /app/frontend
+    # --host 0.0.0.0：コンテナの外（Mac のブラウザ）からの接続を受け付ける
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      # Vite が /api を中継する先。コンテナどうしは、サービス名（backend）で呼び合える
+      API_ORIGIN: http://backend:8000
+    volumes:
+      - ./frontend:/app/frontend
+      - frontend-node-modules:/app/frontend/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  backend-venv:
+  backend-data:
+  uv-cache:
+  frontend-node-modules:
