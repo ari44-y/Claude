@@ -1,0 +1,10 @@
+# 改行コードを、どの PC（Mac / Windows）でも LF にそろえる。
+# Git for Windows は初期設定で CRLF に変えて取り出すため、そのままだと
+# Linux のコンテナやサーバーでシェルスクリプトが動かなくなる（'bash\r': No such file or directory）。
+# text=auto：Git がテキストと判断したファイルだけを対象にする（画像などは触らない）
+* text=auto eol=lf
+
+# 念のため、明らかなバイナリは変換しないと明示する
+*.png binary
+*.jpg binary
+*.ico binary
