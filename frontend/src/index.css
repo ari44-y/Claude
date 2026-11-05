@@ -1,0 +1,22 @@
+/*
+  Tailwind CSS v4 は、この1行だけで使えるようになる。
+  ビルドのときに、コードの中で実際に使ったクラス（p-4 など）の CSS だけが作られる
+*/
+@import "tailwindcss";
+
+/*
+  @theme：Tailwind の色や大きさの設定を足す・変える。
+  ここで --color-brand を決めると、bg-brand・text-brand などのクラスが使えるようになる
+*/
+@theme {
+  --color-brand: oklch(0.55 0.15 255);
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    /* iPhone で、文字の拡大や、タップしたときの灰色のハイライトを抑える */
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
