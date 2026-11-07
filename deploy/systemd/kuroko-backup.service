@@ -1,0 +1,13 @@
+# バックアップを1回実行するサービス。kuroko-backup.timer から毎日起動される。
+# @REPO@ は、インストールするときにリポジトリの場所（例：/home/ari/Claude）に置き換える
+# （docs/解説/04-サーバーの準備.md の手順を参照）
+
+[Unit]
+Description=Kuroko DB backup
+
+[Service]
+# oneshot：常駐せず、1回実行して終わるサービス
+Type=oneshot
+# 先頭の「-」：このファイルがなくてもエラーにしない（なければ backup.sh の初期値を使う）
+EnvironmentFile=-/etc/default/kuroko-backup
+ExecStart=@REPO@/deploy/backup.sh

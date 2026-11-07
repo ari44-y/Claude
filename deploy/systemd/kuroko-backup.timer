@@ -1,0 +1,13 @@
+# 毎日 3:30（日本時間）に kuroko-backup.service を起動するタイマー。
+
+[Unit]
+Description=Run Kuroko DB backup daily
+
+[Timer]
+# 時刻の後ろにタイムゾーンを書くと、サーバーの設定が UTC のままでも日本時間で動く
+OnCalendar=*-*-* 03:30:00 Asia/Tokyo
+# Persistent：3:30 にサーバーが止まっていたら、次に起動したときに1回実行する
+Persistent=true
+
+[Install]
+WantedBy=timers.target
